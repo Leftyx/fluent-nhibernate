@@ -17,13 +17,20 @@ namespace FluentNHibernate.Automapping
         readonly IConventionFinder conventionFinder;
         private readonly IEnumerable<InlineOverride> inlineOverrides;
         private readonly IAutomappingStepSet steps;
+        private readonly EntityAutomapper entityAutomapper;
 
         public AutoMapper(IAutomappingStepSet steps, IAutomappingDiscoveryRules rules, IConventionFinder conventionFinder, IEnumerable<InlineOverride> inlineOverrides)
+            : this(steps, rules, conventionFinder, inlineOverrides, new EntityAutomapper(steps, conventionFinder))
+        {}
+
+        protected AutoMapper(IAutomappingStepSet steps, IAutomappingDiscoveryRules rules, IConventionFinder conventionFinder, IEnumerable<InlineOverride> inlineOverrides, EntityAutomapper entityAutomapper)
         {
             this.steps = steps;
             this.rules = rules;
             this.conventionFinder = conventionFinder;
             this.inlineOverrides = inlineOverrides;
+            this.entityAutomapper = entityAutomapper;
+            this.entityAutomapper.AutoMapper = this; // TODO: Remove this dependency
         }
 
         private void ApplyOverrides(Type classType, IList<string> mappedProperties, ClassMappingBase mapping)
@@ -44,7 +51,7 @@ namespace FluentNHibernate.Automapping
             // to see which properties have already been mapped
             ApplyOverrides(classType, mappedProperties, mapping);
 
-            MapEverythingInClass(mapping, classType, mappedProperties);
+            entityAutomapper.Map(mapping, classType, mappedProperties);
 
             if (mappingTypes != null)
                 MapInheritanceTree(classType, mapping, mappedProperties);
@@ -110,32 +117,8 @@ namespace FluentNHibernate.Automapping
         {
             subclass.Name = inheritedClass.Type.AssemblyQualifiedName;
             ApplyOverrides(inheritedClass.Type, mappedProperties, (ClassMappingBase)subclass);
-            MapEverythingInClass((ClassMappingBase)subclass, inheritedClass.Type, mappedProperties);
+            entityAutomapper.Map((ClassMappingBase)subclass, inheritedClass.Type, mappedProperties);
             inheritedClass.IsMapped = true;
-        }
-
-        public virtual void MapEverythingInClass(ClassMappingBase mapping, Type entityType, IList<string> mappedProperties)
-        {
-            foreach (var property in entityType.GetProperties())
-            {
-                TryToMapProperty(mapping, property.ToMember(), mappedProperties);
-            }
-        }
-
-        protected void TryToMapProperty(ClassMappingBase mapping, Member property, IList<string> mappedProperties)
-        {
-            if (property.HasIndexParameters) return;
-
-            foreach (var rule in steps.GetSteps(this, conventionFinder))
-            {
-                if (!rule.IsMappable(property)) continue;
-                if (mappedProperties.Any(name => name == property.Name)) continue;
-
-                rule.Map(mapping, property);
-                mappedProperties.Add(property.Name);
-
-                break;
-            }
         }
 
         public ClassMapping Map(Type classType, List<AutoMapType> types)

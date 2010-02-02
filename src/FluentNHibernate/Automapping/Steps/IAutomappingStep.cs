@@ -1,6 +1,6 @@
 using FluentNHibernate.MappingModel.ClassBased;
 
-namespace FluentNHibernate.Automapping.Rules
+namespace FluentNHibernate.Automapping.Steps
 {
     public interface IAutomappingStep
     {

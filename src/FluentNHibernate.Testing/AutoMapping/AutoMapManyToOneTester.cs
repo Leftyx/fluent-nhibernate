@@ -1,4 +1,4 @@
-using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
 using NUnit.Framework;
 
 namespace FluentNHibernate.Testing.Automapping

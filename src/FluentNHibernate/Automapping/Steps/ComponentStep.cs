@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using FluentNHibernate.Automapping.Rules;
 using FluentNHibernate.MappingModel.ClassBased;
 
-namespace FluentNHibernate.Automapping.Rules
+namespace FluentNHibernate.Automapping.Steps
 {
     public class ComponentStep : IAutomappingStep
     {

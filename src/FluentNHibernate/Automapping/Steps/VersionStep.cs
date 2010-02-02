@@ -4,7 +4,7 @@ using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.Utils;
 
-namespace FluentNHibernate.Automapping.Rules
+namespace FluentNHibernate.Automapping.Steps
 {
     public class VersionStep : IAutomappingStep
     {

@@ -2,15 +2,15 @@ using System;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 
-namespace FluentNHibernate.Automapping.Rules
+namespace FluentNHibernate.Automapping.Steps
 {
     public class ManyToOneStep : IAutomappingStep
     {
         private readonly Func<Member, bool> findPropertyconvention = p => (
             p.PropertyType.Namespace != "System" && // ignore clr types (won't be entities)
-            p.PropertyType.Namespace != "System.Collections.Generic" &&
-            p.PropertyType.Namespace != "Iesi.Collections.Generic" &&
-            !p.PropertyType.IsEnum);
+                p.PropertyType.Namespace != "System.Collections.Generic" &&
+                    p.PropertyType.Namespace != "Iesi.Collections.Generic" &&
+                        !p.PropertyType.IsEnum);
 
         public bool IsMappable(Member property)
         {

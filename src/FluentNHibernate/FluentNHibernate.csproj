@@ -76,6 +76,7 @@
     <Compile Include="Automapping\AutoJoinedSubClassPart.cs" />
     <Compile Include="Automapping\AutoMap.cs" />
     <Compile Include="Automapping\AutoMapping.cs" />
+    <Compile Include="Automapping\EntityAutomapper.cs" />
     <Compile Include="Automapping\Rules\DefaultDiscoveryRules.cs" />
     <Compile Include="Automapping\Steps\ComponentStep.cs" />
     <Compile Include="Automapping\Rules\DiscoveryRules.cs" />

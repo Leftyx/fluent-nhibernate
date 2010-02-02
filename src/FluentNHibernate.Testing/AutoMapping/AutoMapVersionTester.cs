@@ -1,5 +1,5 @@
 using System.Linq;
-using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.Utils;

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using FluentNHibernate.Automapping.Rules;
 using FluentNHibernate.Conventions;
 
 namespace FluentNHibernate.Automapping.Steps

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
 using FluentNHibernate.Utils;
 using Iesi.Collections.Generic;
 using NUnit.Framework;

@@ -14,12 +14,23 @@ namespace FluentNHibernate.Automapping
         private readonly IAutomappingDiscoveryRules rules;
 
         internal PrivateAutoMapper(IAutomappingStepSet steps, IAutomappingDiscoveryRules rules, IConventionFinder conventionFinder, IEnumerable<InlineOverride> inlineOverrides)
-            : base(steps, rules, conventionFinder, inlineOverrides)
+            : base(steps, rules, conventionFinder, inlineOverrides, new PrivateEntityAutomapper(rules, steps, conventionFinder))
+        {
+            this.rules = rules;
+        }
+    }
+
+    public class PrivateEntityAutomapper : EntityAutomapper
+    {
+        readonly IAutomappingDiscoveryRules rules;
+
+        public PrivateEntityAutomapper(IAutomappingDiscoveryRules rules, IAutomappingStepSet steps, IConventionFinder conventionFinder)
+            : base(steps, conventionFinder)
         {
             this.rules = rules;
         }
 
-        public override void MapEverythingInClass(ClassMappingBase mapping, Type entityType, IList<string> mappedProperties)
+        public override void Map(ClassMappingBase mapping, Type entityType, IList<string> mappedProperties)
         {
             // This will ONLY map private properties. Do not call base.
 
@@ -32,6 +43,6 @@ namespace FluentNHibernate.Automapping
                 if (rule(property))
                     TryToMapProperty(mapping, property, mappedProperties);
             }
-        }
+        } 
     }
 }

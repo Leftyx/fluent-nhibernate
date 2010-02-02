@@ -1,10 +1,11 @@
 using System;
+using FluentNHibernate.Automapping.Rules;
 using FluentNHibernate.Mapping;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.MappingModel.Identity;
 
-namespace FluentNHibernate.Automapping.Rules
+namespace FluentNHibernate.Automapping.Steps
 {
     public class IdentityStep : IAutomappingStep
     {
