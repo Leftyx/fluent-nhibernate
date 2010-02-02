@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
+using FluentNHibernate.Automapping;
+using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
+using FluentNHibernate.Conventions;
 using FluentNHibernate.Mapping.Providers;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
@@ -33,6 +37,7 @@ namespace FluentNHibernate.Mapping
         private readonly PolymorphismBuilder<ClassMap<T>> polymorphism;
         private SchemaActionBuilder<ClassMap<T>> schemaAction;
         protected TuplizerMapping tuplizerMapping;
+        private EntityAutomapper entityAutomapper;
 
         public ClassMap()
         {
@@ -99,7 +104,17 @@ namespace FluentNHibernate.Mapping
 
             mapping.Tuplizer = tuplizerMapping;
 
+            if (entityAutomapper != null)
+                entityAutomapper.Map(mapping, typeof(T), GetMappedProperties(mapping));
+
             return mapping;
+        }
+
+        IList<string> GetMappedProperties(ClassMapping mapping)
+        {
+            return mapping.Properties
+                .Select(x => x.Name)
+                .ToList();
         }
 
         private string GetDefaultTableName()
@@ -460,6 +475,38 @@ namespace FluentNHibernate.Mapping
             tuplizerMapping.Type = new TypeReference(tuplizerType);
 
             return this;
+        }
+
+        /// <summary>
+        /// Automap this entity. Any calls you make to <see cref="ClasslikeMapBase{T}.Map(System.Linq.Expressions.Expression{System.Func{T,object}})"/>,
+        /// <see cref="ClasslikeMapBase{T}.References{TOther}(System.Linq.Expressions.Expression{System.Func{T,TOther}})"/>, or any of the other methods
+        /// will stop those properties from being automapped.
+        /// </summary>
+        public void Automap()
+        {
+            Automap(new DefaultAutomappingSteps());
+        }
+
+        /// <summary>
+        /// Automap this entity. Any calls you make to <see cref="ClasslikeMapBase{T}.Map(System.Linq.Expressions.Expression{System.Func{T,object}})"/>,
+        /// <see cref="ClasslikeMapBase{T}.References{TOther}(System.Linq.Expressions.Expression{System.Func{T,TOther}})"/>, or any of the other methods
+        /// will stop those properties from being automapped.
+        /// </summary>
+        /// <param name="discoveryRules">Property discovery rules for use when automapping.</param>
+        public void Automap(IAutomappingDiscoveryRules discoveryRules)
+        {
+            Automap(new DefaultAutomappingSteps(new DefaultDiscoveryRules()));
+        }
+
+        /// <summary>
+        /// Automap this entity. Any calls you make to <see cref="ClasslikeMapBase{T}.Map(System.Linq.Expressions.Expression{System.Func{T,object}})"/>,
+        /// <see cref="ClasslikeMapBase{T}.References{TOther}(System.Linq.Expressions.Expression{System.Func{T,TOther}})"/>, or any of the other methods
+        /// will stop those properties from being automapped.
+        /// </summary>
+        /// <param name="steps">Automapping steps used to identify and map specific properties.</param>
+        public void Automap(IAutomappingStepSet steps)
+        {
+            entityAutomapper = new EntityAutomapper(steps, new NullConventionFinder());
         }
     }
 }

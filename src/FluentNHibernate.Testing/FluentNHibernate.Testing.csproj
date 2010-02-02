@@ -465,6 +465,7 @@
     <Compile Include="ConventionsTests\DefaultLazyHelperTests.cs" />
     <Compile Include="ConventionsTests\ProxyHelperTests.cs" />
     <Compile Include="FluentInterfaceTests\ClasslikeBehaviors.cs" />
+    <Compile Include="FluentInterfaceTests\ClassMapSpecs\ClassMapSpecs.Automap.cs" />
     <Compile Include="FluentInterfaceTests\ClassMapSpecs\ClassMapSpecs.Cache.cs" />
     <Compile Include="FluentInterfaceTests\ClassMapSpecs\ClassMapSpecs.Component.cs" />
     <Compile Include="FluentInterfaceTests\ClassMapSpecs\ClassMapSpecs.HasMany.cs" />
