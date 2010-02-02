@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
 using FluentNHibernate.Conventions;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
@@ -11,26 +12,18 @@ namespace FluentNHibernate.Automapping
 {
     public class AutoMapper
     {
-        private readonly List<IAutoMapper> mappingRules;
         private List<AutoMapType> mappingTypes;
-        private readonly AutoMappingExpressions expressions;
+        private readonly IAutomappingDiscoveryRules rules;
+        readonly IConventionFinder conventionFinder;
         private readonly IEnumerable<InlineOverride> inlineOverrides;
+        private readonly IAutomappingStepSet steps;
 
-        public AutoMapper(AutoMappingExpressions expressions, IConventionFinder conventionFinder, IEnumerable<InlineOverride> inlineOverrides)
+        public AutoMapper(IAutomappingStepSet steps, IAutomappingDiscoveryRules rules, IConventionFinder conventionFinder, IEnumerable<InlineOverride> inlineOverrides)
         {
-            this.expressions = expressions;
+            this.steps = steps;
+            this.rules = rules;
+            this.conventionFinder = conventionFinder;
             this.inlineOverrides = inlineOverrides;
-
-            mappingRules = new List<IAutoMapper>
-            {
-                new AutoMapIdentity(expressions), 
-                new AutoMapVersion(), 
-                new AutoMapComponent(expressions, this),
-                new AutoMapProperty(conventionFinder, expressions),
-                new AutoMapManyToMany(expressions),
-                new AutoMapManyToOne(),
-                new AutoMapOneToMany(expressions),
-            };
         }
 
         private void ApplyOverrides(Type classType, IList<string> mappedProperties, ClassMappingBase mapping)
@@ -62,15 +55,15 @@ namespace FluentNHibernate.Automapping
         private void MapInheritanceTree(Type classType, ClassMappingBase mapping, IList<string> mappedProperties)
         {
             var discriminatorSet = false;
-            var isDiscriminated = expressions.IsDiscriminated(classType);
+            var isDiscriminated = rules.FindDiscriminatedEntityRule(classType);
 
             foreach (var inheritedClass in mappingTypes.Where(q =>
                 q.Type.BaseType == classType &&
-                    !expressions.IsConcreteBaseType(q.Type.BaseType)))
+                    !rules.FindConcreteBaseTypeRule(q.Type.BaseType)))
             {
                 if (isDiscriminated && !discriminatorSet && mapping is ClassMapping)
                 {
-                    var discriminatorColumn = expressions.DiscriminatorColumn(classType);
+                    var discriminatorColumn = rules.DiscriminatorColumnRule(classType);
                     var discriminator = new DiscriminatorMapping
                     {
                         ContainingEntityType = classType,
@@ -83,7 +76,7 @@ namespace FluentNHibernate.Automapping
                 }
 
                 ISubclassMapping subclassMapping;
-                var subclassStrategy = expressions.SubclassStrategy(classType);
+                var subclassStrategy = rules.SubclassStrategyRule(classType);
 
                 if (subclassStrategy == SubclassStrategy.JoinedSubclass)
                 {
@@ -131,21 +124,17 @@ namespace FluentNHibernate.Automapping
 
         protected void TryToMapProperty(ClassMappingBase mapping, Member property, IList<string> mappedProperties)
         {
-            if (!property.HasIndexParameters)
-            {
-                foreach (var rule in mappingRules)
-                {
-                    if (rule.MapsProperty(property))
-                    {
-                        if (!mappedProperties.Any(name => name == property.Name))
-                        {
-                            rule.Map(mapping, property);
-                            mappedProperties.Add(property.Name);
+            if (property.HasIndexParameters) return;
 
-                            break;
-                        }
-                    }
-                }
+            foreach (var rule in steps.GetSteps(this, conventionFinder))
+            {
+                if (!rule.IsMappable(property)) continue;
+                if (mappedProperties.Any(name => name == property.Name)) continue;
+
+                rule.Map(mapping, property);
+                mappedProperties.Add(property.Name);
+
+                break;
             }
         }
 

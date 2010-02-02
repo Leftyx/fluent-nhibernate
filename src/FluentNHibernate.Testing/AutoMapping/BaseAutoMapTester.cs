@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using FluentNHibernate.Automapping;
+using FluentNHibernate.Automapping.Rules;
 using FluentNHibernate.Utils;
 using Iesi.Collections.Generic;
 using NUnit.Framework;
@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace FluentNHibernate.Testing.Automapping
 {
     public abstract class BaseAutoMapTester<T>
-        where T : IAutoMapper, new()
+        where T : IAutomappingStep, new()
     {
         private T mapper;
 
@@ -21,12 +21,12 @@ namespace FluentNHibernate.Testing.Automapping
 
         protected void ShouldMap(Expression<Func<PropertyTarget, object>> property)
         {
-            mapper.MapsProperty(ReflectionHelper.GetProperty(property).ToMember()).ShouldBeTrue();
+            mapper.IsMappable(ReflectionHelper.GetProperty(property).ToMember()).ShouldBeTrue();
         }
 
         protected void ShouldntMap(Expression<Func<PropertyTarget, object>> property)
         {
-            mapper.MapsProperty(ReflectionHelper.GetProperty(property).ToMember()).ShouldBeFalse();
+            mapper.IsMappable(ReflectionHelper.GetProperty(property).ToMember()).ShouldBeFalse();
         }
 
         protected class PropertyTarget

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using FluentNHibernate.Automapping.Alterations;
+using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Mapping;
 using FluentNHibernate.MappingModel;
@@ -23,13 +25,13 @@ namespace FluentNHibernate.Automapping
 
         public AutoPersistenceModel()
         {
-            Expressions = new AutoMappingExpressions();
-            autoMapper = new AutoMapper(Expressions, Conventions, inlineOverrides);
+            Expressions = new DefaultDiscoveryRules();
+            autoMapper = new AutoMapper(new DefaultAutomappingSteps(Expressions), Expressions, Conventions, inlineOverrides);
         }
 
         public AutoPersistenceModel(AutoMapper customAutomapper)
         {
-            Expressions = new AutoMappingExpressions();
+            Expressions = new DefaultDiscoveryRules();
             autoMapper = customAutomapper;
         }
 
@@ -66,13 +68,13 @@ namespace FluentNHibernate.Automapping
         /// <summary>
         /// Alter some of the configuration options that control how the automapper works
         /// </summary>
-        public AutoPersistenceModel Setup(Action<AutoMappingExpressions> expressionsAction)
+        public AutoPersistenceModel Setup(Action<DiscoveryRules> expressionsAction)
         {
-            expressionsAction(Expressions);
+            expressionsAction(Expressions as DiscoveryRules);
             return this;
         }
 
-        internal AutoMappingExpressions Expressions { get; private set; }
+        internal IAutomappingDiscoveryRules Expressions { get; private set; }
 
         public AutoPersistenceModel Where(Func<Type, bool> where)
         {
@@ -159,7 +161,7 @@ namespace FluentNHibernate.Automapping
 
         private bool ShouldMapParent(Type type)
         {
-            return ShouldMap(type.BaseType) && !Expressions.IsConcreteBaseType(type.BaseType);
+            return ShouldMap(type.BaseType) && !Expressions.FindConcreteBaseTypeRule(type.BaseType);
         }
 
         private bool ShouldMap(Type type)
@@ -170,12 +172,8 @@ namespace FluentNHibernate.Automapping
                 return false; // excluded
             if (type.IsGenericType && ignoredTypes.Contains(type.GetGenericTypeDefinition()))
                 return false; // generic definition is excluded
-            if (type.IsAbstract && Expressions.AbstractClassIsLayerSupertype(type))
+            if (type.IsAbstract && Expressions.AbstractClassIsLayerSupertypeRule(type))
                 return false; // is abstract and a layer supertype
-#pragma warning disable 618,612
-            if (Expressions.IsBaseType(type))
-#pragma warning restore 618,612
-                return false; // excluded
             if (type == typeof(object))
                 return false; // object!
 
@@ -222,7 +220,7 @@ namespace FluentNHibernate.Automapping
             // if we haven't found a map yet then try to find a map of the
             // base type to merge if not a concrete base type
 
-			if (type.BaseType != typeof(object) && !Expressions.IsConcreteBaseType(type.BaseType))
+			if (type.BaseType != typeof(object) && !Expressions.FindConcreteBaseTypeRule(type.BaseType))
 			{
 				return FindMapping(type.BaseType);
 			}

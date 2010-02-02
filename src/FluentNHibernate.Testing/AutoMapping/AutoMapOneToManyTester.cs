@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using FluentNHibernate.Automapping;
+using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.MappingModel.Collections;
 using FluentNHibernate.Utils;
@@ -13,12 +14,12 @@ namespace FluentNHibernate.Testing.Automapping
     [TestFixture]
     public class AutoMapOneToManyTester
     {
-        private AutoMapOneToMany mapper;
+        private OneToManyStep mapper;
 
         [SetUp]
         public void CreateMapper()
         {
-            mapper = new AutoMapOneToMany(new AutoMappingExpressions());
+            mapper = new OneToManyStep(new DefaultDiscoveryRules());
         }
 
         [Test]
@@ -91,12 +92,12 @@ namespace FluentNHibernate.Testing.Automapping
 
         protected void ShouldMap(Expression<System.Func<PropertyTarget, object>> property)
         {
-            mapper.MapsProperty(ReflectionHelper.GetProperty(property).ToMember()).ShouldBeTrue();
+            mapper.IsMappable(ReflectionHelper.GetProperty(property).ToMember()).ShouldBeTrue();
         }
 
         protected void ShouldntMap(Expression<System.Func<PropertyTarget, object>> property)
         {
-            mapper.MapsProperty(ReflectionHelper.GetProperty(property).ToMember()).ShouldBeFalse();
+            mapper.IsMappable(ReflectionHelper.GetProperty(property).ToMember()).ShouldBeFalse();
         }
 
         protected class PropertyTarget

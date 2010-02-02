@@ -1,22 +1,22 @@
 using System;
 using System.Linq;
-using System.Reflection;
+using FluentNHibernate.Automapping.Rules;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.MappingModel.Collections;
 
-namespace FluentNHibernate.Automapping
+namespace FluentNHibernate.Automapping.Steps
 {
-    public class AutoMapManyToMany : IAutoMapper
+    public class ManyToManyStep : IAutomappingStep
     {
-        private readonly AutoMappingExpressions expressions;
+        private readonly IAutomappingDiscoveryRules rules;
 
-        public AutoMapManyToMany(AutoMappingExpressions expressions)
+        public ManyToManyStep(IAutomappingDiscoveryRules rules)
         {
-            this.expressions = expressions;
+            this.rules = rules;
         }
 
-        public bool MapsProperty(Member property)
+        public bool IsMappable(Member property)
         {
             var type = property.PropertyType;
             if (type.Namespace != "Iesi.Collections.Generic" &&
@@ -81,7 +81,7 @@ namespace FluentNHibernate.Automapping
             var columnName = property.DeclaringType.Name + "_id";
 
             if (classMap is ComponentMapping)
-                columnName = expressions.GetComponentColumnPrefix(((ComponentMapping)classMap).Member) + columnName;
+                columnName = rules.ComponentColumnPrefixRule(((ComponentMapping)classMap).Member) + columnName;
 
             var key = new KeyMapping();
 
@@ -91,13 +91,13 @@ namespace FluentNHibernate.Automapping
             mapping.SetDefaultValue(x => x.Key, key);
         }
 
-        public void Map(ClassMappingBase classMap, Member property)
+        public void Map(ClassMappingBase classMap, Member member)
         {
-            var inverseProperty = GetInverseProperty(property);
-            var parentSide = expressions.GetParentSideForManyToMany(property.DeclaringType, inverseProperty.DeclaringType);
-            var mapping = GetCollection(property);
+            var inverseProperty = GetInverseProperty(member);
+            var parentSide = rules.FindParentSideForManyToManyRule(member.DeclaringType, inverseProperty.DeclaringType);
+            var mapping = GetCollection(member);
 
-            ConfigureModel(property, mapping, classMap, parentSide);
+            ConfigureModel(member, mapping, classMap, parentSide);
 
             classMap.AddCollection(mapping);
         }

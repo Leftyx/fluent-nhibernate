@@ -1,36 +1,35 @@
 using System;
-using System.Reflection;
 using FluentNHibernate.Mapping;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.MappingModel.Identity;
 
-namespace FluentNHibernate.Automapping
+namespace FluentNHibernate.Automapping.Rules
 {
-    public class AutoMapIdentity : IAutoMapper
+    public class IdentityStep : IAutomappingStep
     {
-        private readonly AutoMappingExpressions expressions;
+        private readonly IAutomappingDiscoveryRules rules;
 
-        public AutoMapIdentity(AutoMappingExpressions conventions)
+        public IdentityStep(IAutomappingDiscoveryRules rules)
         {
-            this.expressions = conventions;
+            this.rules = rules;
         }
 
-        public bool MapsProperty(Member property)
+        public bool IsMappable(Member property)
         {
-            return expressions.FindIdentity(property);
+            return rules.FindIdentityRule(property);
         }
 
-        public void Map(ClassMappingBase classMap, Member property)
+        public void Map(ClassMappingBase classMap, Member member)
         {
             if (!(classMap is ClassMapping)) return;
 
             var idMapping = new IdMapping { ContainingEntityType = classMap.Type };
-            idMapping.AddDefaultColumn(new ColumnMapping() { Name = property.Name });
-            idMapping.Name = property.Name;
-            idMapping.Type = new TypeReference(property.PropertyType);
-            idMapping.Member = property;
-            idMapping.SetDefaultValue("Generator", GetDefaultGenerator(property));
+            idMapping.AddDefaultColumn(new ColumnMapping() { Name = member.Name });
+            idMapping.Name = member.Name;
+            idMapping.Type = new TypeReference(member.PropertyType);
+            idMapping.Member = member;
+            idMapping.SetDefaultValue("Generator", GetDefaultGenerator(member));
             ((ClassMapping)classMap).Id = idMapping;        
         }
 

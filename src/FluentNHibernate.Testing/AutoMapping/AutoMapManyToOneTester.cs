@@ -1,10 +1,10 @@
-using FluentNHibernate.Automapping;
+using FluentNHibernate.Automapping.Rules;
 using NUnit.Framework;
 
 namespace FluentNHibernate.Testing.Automapping
 {
     [TestFixture]
-    public class AutoMapManyToOneTester : BaseAutoMapTester<AutoMapManyToOne>
+    public class AutoMapManyToOneTester : BaseAutoMapTester<ManyToOneStep>
     {
         [Test]
         public void ShouldntMapSets()

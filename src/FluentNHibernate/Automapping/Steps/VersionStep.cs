@@ -1,36 +1,34 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using FluentNHibernate.Mapping;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.Utils;
 
-namespace FluentNHibernate.Automapping
+namespace FluentNHibernate.Automapping.Rules
 {
-    public class AutoMapVersion : IAutoMapper
+    public class VersionStep : IAutomappingStep
     {
         private static readonly IList<string> ValidNames = new List<string> { "version", "timestamp" };
         private static readonly IList<Type> ValidTypes = new List<Type> { typeof(int), typeof(long), typeof(TimeSpan), typeof(byte[]) };
 
-        public bool MapsProperty(Member property)
+        public bool IsMappable(Member property)
         {
             return ValidNames.Contains(property.Name.ToLowerInvariant()) && ValidTypes.Contains(property.PropertyType);
         }
 
-        public void Map(ClassMappingBase classMap, Member property)
+        public void Map(ClassMappingBase classMap, Member member)
         {
             if (!(classMap is ClassMapping)) return;
 
             var version = new VersionMapping
             {
-                Name = property.Name,
+                Name = member.Name,
             };
 
-            version.SetDefaultValue("Type", GetDefaultType(property));
-            version.AddDefaultColumn(new ColumnMapping { Name = property.Name });
+            version.SetDefaultValue("Type", GetDefaultType(member));
+            version.AddDefaultColumn(new ColumnMapping { Name = member.Name });
 
-            if (IsSqlTimestamp(property))
+            if (IsSqlTimestamp(member))
             {
                 version.Columns.Each(x =>
                 {

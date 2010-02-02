@@ -68,7 +68,6 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AutoMappingExpressions.cs" />
     <Compile Include="Automapping\Alterations\AutoMappingOverrideAlteration.cs" />
     <Compile Include="Automapping\Alterations\IAutoMappingAlteration.cs" />
     <Compile Include="Automapping\Alterations\IAutoMappingOverride.cs" />
@@ -77,21 +76,25 @@
     <Compile Include="Automapping\AutoJoinedSubClassPart.cs" />
     <Compile Include="Automapping\AutoMap.cs" />
     <Compile Include="Automapping\AutoMapping.cs" />
-    <Compile Include="Automapping\AutoMapComponent.cs" />
-    <Compile Include="Automapping\AutoMapIdentity.cs" />
-    <Compile Include="Automapping\AutoMapManyToMany.cs" />
-    <Compile Include="Automapping\AutoMapManyToOne.cs" />
-    <Compile Include="Automapping\AutoMapOneToMany.cs" />
+    <Compile Include="Automapping\Rules\DefaultDiscoveryRules.cs" />
+    <Compile Include="Automapping\Steps\ComponentStep.cs" />
+    <Compile Include="Automapping\Rules\DiscoveryRules.cs" />
+    <Compile Include="Automapping\Steps\DefaultAutomappingSteps.cs" />
+    <Compile Include="Automapping\Steps\IAutomappingStepSet.cs" />
+    <Compile Include="Automapping\Steps\IdentityStep.cs" />
+    <Compile Include="Automapping\Steps\ManyToManyStep.cs" />
+    <Compile Include="Automapping\Steps\ManyToOneStep.cs" />
+    <Compile Include="Automapping\Steps\OneToManyStep.cs" />
     <Compile Include="Automapping\AutoMapper.cs" />
     <Compile Include="Automapping\AutoMappingAlterationCollection.cs" />
     <Compile Include="Automapping\AutoMappingException.cs" />
-    <Compile Include="Automapping\AutoMapProperty.cs" />
+    <Compile Include="Automapping\Steps\PropertyStep.cs" />
     <Compile Include="Automapping\AutoMapType.cs" />
-    <Compile Include="Automapping\AutoMapVersion.cs" />
+    <Compile Include="Automapping\Steps\VersionStep.cs" />
     <Compile Include="Automapping\AutoPersistenceModel.cs" />
     <Compile Include="Automapping\AutoSubClassPart.cs" />
     <Compile Include="Automapping\IAutoClasslike.cs" />
-    <Compile Include="Automapping\IAutoMapper.cs" />
+    <Compile Include="Automapping\Steps\IAutomappingStep.cs" />
     <Compile Include="Automapping\IAutoMappingAlteration.cs" />
     <Compile Include="Automapping\InlineOverride.cs" />
     <Compile Include="Automapping\IPropertyIgnorer.cs" />
@@ -390,6 +393,7 @@
     <Compile Include="MappingModel\EqualityExtensions.cs" />
     <Compile Include="Mapping\Providers\IExternalComponentMappingProvider.cs" />
     <Compile Include="Mapping\Providers\IReferenceComponentMappingProvider.cs" />
+    <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Visitors\AmbiguousComponentReferenceException.cs" />
     <Compile Include="Visitors\BiDirectionalManyToManyPairingVisitor.cs" />
     <Compile Include="MappingModel\ClassBased\ReferenceComponentMapping.cs" />

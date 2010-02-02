@@ -45,10 +45,10 @@ namespace FluentNHibernate.Testing.Automapping
                 mapping.Collections.ShouldContain(x => x.Member == ReflectionHelper.GetProperty(PrivateExampleParent.PrivateProperties.Children).ToMember()));
         }
 
-        private void Model<T>(Func<Member, bool> convention)
+        private void Model<T>(Predicate<Member> convention)
         {
             model = new PrivateAutoPersistenceModel()
-                .Setup(conventions => conventions.FindMappablePrivateProperties = convention);
+                .Setup(x => x.FindMappablePrivateProperties(convention));
             model.ValidationEnabled = false;
             model.AddTypeSource(new StubTypeSource(typeof(T)));
             model.BuildMappings();

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
 using FluentNHibernate.Conventions;
 using FluentNHibernate.MappingModel.ClassBased;
 
@@ -9,19 +11,19 @@ namespace FluentNHibernate.Automapping
 {
     public class PrivateAutoMapper : AutoMapper
     {
-        private readonly AutoMappingExpressions localExpressions;
+        private readonly IAutomappingDiscoveryRules rules;
 
-        internal PrivateAutoMapper(AutoMappingExpressions expressions, IConventionFinder conventionFinder, IEnumerable<InlineOverride> inlineOverrides)
-            : base(expressions, conventionFinder, inlineOverrides)
+        internal PrivateAutoMapper(IAutomappingStepSet steps, IAutomappingDiscoveryRules rules, IConventionFinder conventionFinder, IEnumerable<InlineOverride> inlineOverrides)
+            : base(steps, rules, conventionFinder, inlineOverrides)
         {
-            localExpressions = expressions;
+            this.rules = rules;
         }
 
         public override void MapEverythingInClass(ClassMappingBase mapping, Type entityType, IList<string> mappedProperties)
         {
             // This will ONLY map private properties. Do not call base.
 
-            var rule = localExpressions.FindMappablePrivateProperties;
+            var rule = rules.FindMappablePrivatePropertiesRule;
             if (rule == null)
                 throw new InvalidOperationException("The FindMappablePrivateProperties convention must be supplied to use the PrivateAutoMapper. ");
 

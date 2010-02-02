@@ -26,7 +26,7 @@ namespace FluentNHibernate.Testing.Automapping.Apm
         {
             var automapper =
                 AutoMap.Source(new StubTypeSource(new[] { typeof(AbstractBase), typeof(Child) }))
-                    .Setup(x => x.AbstractClassIsLayerSupertype = t => false);
+                    .Setup(x => x.AbstractClassIsLayerSupertype(t => false));
 
             automapper.ValidationEnabled = false;
             var mappings = automapper.BuildMappings();

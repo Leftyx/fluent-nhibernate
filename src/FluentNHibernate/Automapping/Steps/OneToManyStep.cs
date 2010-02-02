@@ -1,47 +1,40 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using FluentNHibernate.Mapping;
+using FluentNHibernate.Automapping.Rules;
 using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.MappingModel.Collections;
 using FluentNHibernate.Utils;
 
-namespace FluentNHibernate.Automapping
+namespace FluentNHibernate.Automapping.Steps
 {
-    public class AutoMapOneToMany : IAutoMapper
+    public class OneToManyStep : IAutomappingStep
     {
-        private readonly AutoMappingExpressions expressions;
-        private readonly Func<Member, bool> findPropertyconvention = 
-            p => (p.PropertyType.Namespace == "System.Collections.Generic" ||
-                  p.PropertyType.Namespace == "Iesi.Collections.Generic");
+        private readonly IAutomappingDiscoveryRules rules;
 
-        public AutoMapOneToMany(AutoMappingExpressions expressions)
+        public OneToManyStep(IAutomappingDiscoveryRules rules)
         {
-            this.expressions = expressions;
+            this.rules = rules;
         }
 
-        public bool MapsProperty(Member property)
+        public bool IsMappable(Member property)
         {
-            if (property.CanWrite)
-                return findPropertyconvention(property);
-
-            return false;
+            return rules.FindOneToManyRule(property);
         }
 
-        public void Map(ClassMappingBase classMap, Member property)
+        public void Map(ClassMappingBase classMap, Member member)
         {
-            if (property.DeclaringType != classMap.Type)
+            if (member.DeclaringType != classMap.Type)
                 return;
 
-            var mapping = GetCollectionMapping(property.PropertyType);
+            var mapping = GetCollectionMapping(member.PropertyType);
 
             mapping.ContainingEntityType = classMap.Type;
-            mapping.Member = property;
-            mapping.SetDefaultValue(x => x.Name, property.Name);
+            mapping.Member = member;
+            mapping.SetDefaultValue(x => x.Name, member.Name);
 
-            SetRelationship(property, classMap, mapping);
-            SetKey(property, classMap, mapping);
+            SetRelationship(member, classMap, mapping);
+            SetKey(member, classMap, mapping);
 
             classMap.AddCollection(mapping);        
         }
@@ -70,7 +63,7 @@ namespace FluentNHibernate.Automapping
             var columnName = property.DeclaringType.Name + "_id";
 
             if (classMap is ComponentMapping)
-                columnName = expressions.GetComponentColumnPrefix(((ComponentMapping)classMap).Member) + columnName;
+                columnName = rules.ComponentColumnPrefixRule(((ComponentMapping)classMap).Member) + columnName;
 
             var key = new KeyMapping();
 

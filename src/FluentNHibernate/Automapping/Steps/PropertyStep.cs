@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using System.Reflection;
+using FluentNHibernate.Automapping.Rules;
 using FluentNHibernate.Conventions;
 using FluentNHibernate.Conventions.AcceptanceCriteria;
 using FluentNHibernate.Conventions.Inspections;
@@ -9,20 +9,20 @@ using FluentNHibernate.MappingModel;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.Utils;
 
-namespace FluentNHibernate.Automapping
+namespace FluentNHibernate.Automapping.Steps
 {
-    public class AutoMapProperty : IAutoMapper
+    public class PropertyStep : IAutomappingStep
     {
         private readonly IConventionFinder conventionFinder;
-        private readonly AutoMappingExpressions expressions;
+        private readonly IAutomappingDiscoveryRules rules;
 
-        public AutoMapProperty(IConventionFinder conventionFinder, AutoMappingExpressions expressions)
+        public PropertyStep(IAutomappingDiscoveryRules rules, IConventionFinder conventionFinder)
         {
             this.conventionFinder = conventionFinder;
-            this.expressions = expressions;
+            this.rules = rules;
         }
 
-        public bool MapsProperty(Member property)
+        public bool IsMappable(Member property)
         {
             if (HasExplicitTypeConvention(property))
                 return true;
@@ -67,13 +67,13 @@ namespace FluentNHibernate.Automapping
         private static bool IsMappableToColumnType(Member property)
         {
             return property.PropertyType.Namespace == "System"
-                    || property.PropertyType.FullName == "System.Drawing.Bitmap"
+                || property.PropertyType.FullName == "System.Drawing.Bitmap"
                     || property.PropertyType.IsEnum;
         }
 
-        public void Map(ClassMappingBase classMap, Member property)
+        public void Map(ClassMappingBase classMap, Member member)
         {
-            classMap.AddProperty(GetPropertyMapping(classMap.Type, property, classMap as ComponentMapping));
+            classMap.AddProperty(GetPropertyMapping(classMap.Type, member, classMap as ComponentMapping));
         }
 
         private PropertyMapping GetPropertyMapping(Type type, Member property, ComponentMapping component)
@@ -87,7 +87,7 @@ namespace FluentNHibernate.Automapping
             var columnName = property.Name;
             
             if (component != null)
-                columnName = expressions.GetComponentColumnPrefix(component.Member) + columnName;
+                columnName = rules.ComponentColumnPrefixRule(component.Member) + columnName;
 
             mapping.AddDefaultColumn(new ColumnMapping { Name = columnName });
 

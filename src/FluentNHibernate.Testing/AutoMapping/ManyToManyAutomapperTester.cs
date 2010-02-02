@@ -1,4 +1,5 @@
-using FluentNHibernate.Automapping;
+using FluentNHibernate.Automapping.Rules;
+using FluentNHibernate.Automapping.Steps;
 using FluentNHibernate.Mapping;
 using FluentNHibernate.MappingModel.ClassBased;
 using FluentNHibernate.Testing.Automapping.ManyToMany;
@@ -17,7 +18,7 @@ namespace FluentNHibernate.Testing.Automapping
             var Member = ReflectionHelper.GetProperty<ManyToMany1>(x => x.Many1).ToMember();
             var autoMap = new ClassMapping();
 
-            var mapper = new AutoMapManyToMany(new AutoMappingExpressions());
+            var mapper = new ManyToManyStep(new DefaultDiscoveryRules());
             mapper.Map(autoMap, Member);
 
             autoMap.Collections.ShouldHaveCount(1);
